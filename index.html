@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Duty Analyzer | 비행근무제한 규정</title>
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js'></script>
+    <style>
+        :root {
+            --bg-light: #f8fafc;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --panel-border: rgba(0, 0, 0, 0.06);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --accent-gradient: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+            --accent-alert: #ef4444;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
+            overflow-x: clip;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .bg-shapes { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
+        .shape { position: absolute; filter: blur(120px); opacity: 0.5; animation: float 20s infinite ease-in-out alternate; }
+        .shape-1 { width: 600px; height: 600px; background: #00f2fe33; top: -10%; left: -10%; }
+        .shape-2 { width: 500px; height: 500px; background: #f093fb22; bottom: -10%; right: -5%; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 100% { transform: translate(50px, 50px) rotate(15deg) scale(1.1); } }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
+        .hero { text-align: center; margin-bottom: 5rem; animation: fadeUp 1s ease-out; }
+        .badge { display: inline-block; padding: 0.5rem 1.2rem; background: rgba(79, 172, 254, 0.1); border: 1px solid rgba(79, 172, 254, 0.2); color: #4facfe; border-radius: 50px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 1.5rem; }
+        h1 { font-size: 3.5rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 1rem; background: var(--text-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        h1 span { background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .glass-panel {
+            background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 20px; padding: 2.5rem; margin-bottom: 2rem; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1); backdrop-filter: blur(16px); transform: translateY(20px); animation: fadeUp 0.8s forwards;
+        }
+
+        h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.8rem; }
+        h2::before { content: ''; display: block; width: 4px; height: 1.2em; background: var(--accent-gradient); border-radius: 4px; }
+
+        .table-responsive { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--panel-border); }
+        table { width: 100%; min-width: 800px; border-collapse: collapse; text-align: center; background: rgba(255, 255, 255, 0.5); }
+        th, td { padding: 1.2rem; border-bottom: 1px solid var(--panel-border); font-size: 0.95rem; }
+        th { background: rgba(0,0,0,0.04); font-weight: 600; color: #334155; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 2rem 0.5rem; }
+            h1 { font-size: 2.2rem; }
+            .glass-panel { padding: 1rem; }
+            th, td { padding: 0.8rem 0.5rem; font-size: 0.8rem; }
+        }
+
+        .scroll-hint { display: none; text-align: right; font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.5rem; }
+        @media (max-width: 768px) { .scroll-hint { display: block; } }
+
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* Calendar Custom */
+        .fc-event { border: none !important; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; }
+        .fc-header-toolbar h2 { font-size: 1.2rem !important; font-weight: 700 !important; }
+    </style>
+</head>
+
+<body>
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+
+    <div class="container">
+        <header class="hero">
+            <div class="badge">Aviation Standards 2026</div>
+            <h1>Flight Duty <span>Analyzer</span></h1>
+            <p>대한민국 조종사 비행시간 기준 및 비행 피로 관리 규정 (아시아나항공 FOM 73-3 기반)</p>
+        </header>
+
+        <section class="glass-panel" id="app-dashboard" style="border: 2px solid rgba(14, 165, 233, 0.4);">
+            <h2 style="color: #0284c7; justify-content: center;">📊 비행 스케줄 자동 분석 모듈</h2>
+            <div class="upload-container" style="display: flex; gap: 1rem; align-items: center; justify-content: center; flex-direction: column; padding: 1rem;">
+                <p style="color: var(--text-secondary); text-align: center;">아시아나항공 스케줄 PDF 파일들을 한 번에 여러 장 선택해서 올리세요.</p>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;">
+                    <input type="file" id="pdf-upload" accept=".pdf" multiple style="padding: 0.8rem; background: rgba(255,255,255,0.8); border: 2px dashed #94a3b8; border-radius: 12px; cursor: pointer;">
+                    <button id="analyze-btn" style="background: var(--accent-gradient); color: white; border: none; padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; font-size: 1.1rem; cursor: pointer;">자동 분석 (Analyze)</button>
+                </div>
+                <div id="loading" style="display: none; color: #0284c7; margin-top: 1rem; font-weight: 600;">⏳ 엔진이 시차/규정 정보를 분석 중입니다. 잠시만 기다려 주세요...</div>
+            </div>
+            
+            <div id="results-dashboard" style="display: none; margin-top: 3rem;">
+                <!-- NEW CALENDAR SECTION -->
+                <div style="margin-bottom: 3rem;">
+                    <h3 style="margin-bottom: 1.5rem; text-align: center; color: #0284c7;">🗓️ 스케줄 달력 뷰 (비행/휴무/훈련)</h3>
+                    <div class="calendar-wrapper" style="width: 100%; background: rgba(255,255,255,0.7); border-radius: 16px; border: 1px solid var(--panel-border); overflow: hidden; min-height: 700px;">
+                        <div id="calendar" style="padding: 1rem;"></div>
+                    </div>
+                </div>
+
+                <h3>📋 스케줄 비행/휴식시간 타임라인</h3>
+                <p class="scroll-hint">← 좌우로 스크롤하여 확인하세요 →</p>
+                <div class="table-responsive" style="margin-top: 0.5rem; max-height: 500px; overflow-y: auto;">
+                    <table id="flights-table">
+                        <thead style="position: sticky; top: 0; z-index: 10; background: var(--bg-light);">
+                            <tr>
+                                <th>날짜</th><th>FLT</th><th>구간</th><th>DEP</th><th>ARR</th><th>승무</th><th>FDP</th><th>다음 휴식</th><th>상태</th>
+                            </tr>
+                        </thead>
+                        <tbody id="flights-table-body"></tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 3rem; margin-bottom: 3rem;">
+                    <h3>📈 기간별 피로도 누적 트렌드</h3>
+                    <div style="width: 100%; height: 380px; margin: 1.5rem auto; background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--panel-border);">
+                        <canvas id="fatigue-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <a href="regulations.html" class="regulations-link-card glass-panel" style="display: block; text-decoration: none; text-align: center; padding: 2rem; margin-bottom: 2rem; border: 2px solid rgba(2, 132, 199, 0.2); cursor: pointer;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.8rem;">📋</div>
+            <h2 style="justify-content: center; font-size: 1.4rem; color: #0284c7;">비행시간 제한 · 휴식 규정 보기</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">규정 전체 보기 →</p>
+        </a>
+    </div>
+
+    <script>
+        const API_URL = "/api/analyze";
+        const analyzeBtn = document.getElementById("analyze-btn");
+        const pdfUpload = document.getElementById("pdf-upload");
+        const loading = document.getElementById("loading");
+        const resultsDashboard = document.getElementById("results-dashboard");
+        const tbody = document.getElementById("flights-table-body");
+        
+        let fatigueChart = null;
+
+        analyzeBtn.addEventListener("click", async () => {
+            const files = pdfUpload.files;
+            if (files.length === 0) {
+                alert("PDF 파일을 업로드해주세요!");
+                return;
+            }
+            loading.style.display = "block";
+            resultsDashboard.style.display = "none";
+            analyzeBtn.disabled = true;
+
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) formData.append("files", files[i]);
+
+            try {
+                const response = await fetch(API_URL, { method: "POST", body: formData });
+                const data = await response.json();
+                if (data.status === "success" && data.flights.length > 0) {
+                    renderDashboard(data.flights);
+                } else {
+                    alert("분석 오류: " + (data.error || "데이터 없음"));
+                }
+            } catch (err) {
+                console.error(err);
+                alert("서버 연결 실패");
+            } finally {
+                loading.style.display = "none";
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        function renderDashboard(flights) {
+            resultsDashboard.style.display = "block";
+            tbody.innerHTML = "";
+            let labels = [];
+            let duty7dData = [];
+            let duty28dData = [];
+            let calendarEvents = [];
+
+            flights.forEach(f => {
+                const event_type = f.event_type || 'FLIGHT';
+
+                // 1. Populate Table (Only for Flights)
+                if (event_type === "FLIGHT") {
+                    const tr = document.createElement("tr");
+                    let statusHtml = (f.rest_emoji ? `<div style="font-size:1.2rem;">${f.rest_emoji}</div>` : '') +
+                        (f.warnings || []).map(w => `<span style="color:var(--accent-alert); font-size:0.8rem; display:block;">⚠️ ${w}</span>`).join('');
+
+                    tr.innerHTML = `
+                        <td style="font-weight:600;">${f.dep_date_str_local}</td>
+                        <td style="color:#0284c7; font-weight:700;">${f.flight_no}</td>
+                        <td>${f.sector}</td>
+                        <td style="font-size:0.82rem;">${(f.std_local_str || '').replace(' ', '<br>')}</td>
+                        <td style="font-size:0.82rem;">${(f.sta_local_str || '').replace(' ', '<br>')}</td>
+                        <td>${f.flight_time_str}</td>
+                        <td>${f.fdp_str}</td>
+                        <td style="font-weight:600;">${f.rest_period_str}</td>
+                        <td>${statusHtml}</td>
+                    `;
+                    tbody.appendChild(tr);
+
+                    if (f.std) {
+                        labels.push(new Date(f.std).toLocaleDateString('ko-KR', {month:'short', day:'numeric'}) + " F" + f.flight_no);
+                        duty7dData.push(f.cumulative_duty_7d_mins / 60);
+                        duty28dData.push(f.cumulative_duty_28d_mins / 60);
+                    }
+                }
+
+                // 2. Populate Calendar (All Events)
+                if (f.std && f.sta) {
+                    let bgColor = "#0284c7"; // Default Flight
+                    let title = f.flight_no || f.sector;
+
+                    if (event_type === "OFF") {
+                        bgColor = "#94a3b8"; // Gray
+                        title = "DAY OFF";
+                    } else if (event_type === "STBY") {
+                        bgColor = "#c2410c"; // Dark Orange
+                    } else if (event_type === "TRAINING") {
+                        bgColor = "#7f1d1d"; // Dark Red
+                    }
+
+                    // For calendar, we only display FLIGHT content (flight_no)
+                    // Wait, user asked "FLIGHT 열에 있는 내용 만을 표시"
+                    // If it's a flight, f.flight_no is the flight number.
+                    // If it's STBY, it might be in f.flight_no too. 
+                    // Let's use f.flight_no as the primary title in calendar.
+                    
+                    calendarEvents.push({
+                        title: title,
+                        start: f.std,
+                        end: f.sta,
+                        backgroundColor: bgColor,
+                        borderColor: 'transparent',
+                        extendedProps: {
+                            fullData: f
+                        }
+                    });
+                }
+            });
+
+            // 3. Initialize Calendar
+            const calendarEl = document.getElementById('calendar');
+            calendarEl.innerHTML = '';
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'ko',
+                firstDay: 1,
+                initialDate: calendarEvents.length > 0 ? calendarEvents[0].start.split('T')[0] : null,
+                events: calendarEvents,
+                height: 700,
+                expandRows: true,
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth' },
+                buttonText: { today: '오늘', month: '월간' },
+                eventDisplay: 'block',
+                displayEventTime: false,
+                eventDidMount: function(info) {
+                    info.el.style.fontSize = '0.78rem';
+                    info.el.style.borderRadius = '5px';
+                    info.el.style.fontWeight = '600';
+                    info.el.style.padding = '2px 4px';
+                },
+                eventClick: function(info) {
+                    const f = info.event.extendedProps.fullData;
+                    Swal.fire({
+                        title: `🗓️ 일정 상세 정보`,
+                        html: `
+                            <div style="text-align: left; padding: 10px; line-height: 1.8;">
+                                <p><b>종류:</b> ${f.event_type}</p>
+                                <p><b>내용:</b> <span style="color:#0284c7; font-weight:700;">${f.flight_no}</span></p>
+                                <p><b>구간/장소:</b> ${f.sector || '-'}</p>
+                                <p><b>출발(Local):</b> ${f.std_local_str}</p>
+                                <p><b>도착(Local):</b> ${f.sta_local_str}</p>
+                                ${f.event_type === 'FLIGHT' ? `
+                                    <p><b>승무 시간:</b> ${f.flight_time_str}</p>
+                                    <p><b>FDP:</b> ${f.fdp_str}</p>
+                                ` : ''}
+                            </div>
+                        `,
+                        confirmButtonColor: '#0284c7'
+                    });
+                }
+            });
+            calendar.render();
+            setTimeout(() => { calendar.updateSize(); window.dispatchEvent(new Event('resize')); }, 500);
+
+            // 4. Initialize Chart
+            const ctx = document.getElementById('fatigue-chart').getContext('2d');
+            if (fatigueChart) fatigueChart.destroy();
+            fatigueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: '7일 누적 (60h 상한)', data: duty7dData, borderColor: '#ef4444', fill: false, tension: 0.3 },
+                        { label: '28일 누적 (190h 상한)', data: duty28dData, borderColor: '#0284c7', fill: false, tension: 0.3 }
+                    ]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    scales: { y: { beginAtZero: true, title: { display: true, text: '시간 (Hours)' } } } 
+                }
+            });
+        }
+    </script>
+</body>
+</html>
