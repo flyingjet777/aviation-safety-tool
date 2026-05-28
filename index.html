@@ -17,10 +17,10 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js'></script>
     <style>
         :root {
-            --bg-light: #f8fafc;
-            --panel-bg: rgba(255, 255, 255, 0.85);
-            --panel-border: rgba(0, 0, 0, 0.06);
-            --text-primary: #1e293b;
+            --bg-light: #f0f5ff;
+            --panel-bg: rgba(255, 255, 255, 0.75);
+            --panel-border: rgba(148, 163, 184, 0.2);
+            --text-primary: #0f172a;
             --text-secondary: #475569;
             --accent-gradient: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
             --accent-alert: #ef4444;
@@ -36,45 +36,87 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* 배경 오브 */
         .bg-shapes { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
-        .shape { position: absolute; filter: blur(120px); opacity: 0.5; animation: float 20s infinite ease-in-out alternate; }
-        .shape-1 { width: 600px; height: 600px; background: #00f2fe33; top: -10%; left: -10%; }
-        .shape-2 { width: 500px; height: 500px; background: #f093fb22; bottom: -10%; right: -5%; animation-delay: -5s; }
-        @keyframes float { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 100% { transform: translate(50px, 50px) rotate(15deg) scale(1.1); } }
+        .shape { position: absolute; filter: blur(130px); animation: float 22s infinite ease-in-out alternate; }
+        .shape-1 { width: 700px; height: 700px; background: rgba(14,165,233,0.18); top: -15%; left: -10%; }
+        .shape-2 { width: 500px; height: 500px; background: rgba(168,85,247,0.1); bottom: -10%; right: -5%; animation-delay: -7s; }
+        .shape-3 { width: 400px; height: 400px; background: rgba(34,211,238,0.12); top: 40%; left: 55%; animation-delay: -12s; }
+        @keyframes float { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(40px,60px) scale(1.1); } }
+
+        /* 미세 그리드 */
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: -1;
+            background-image: linear-gradient(rgba(14,165,233,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.04) 1px, transparent 1px);
+            background-size: 64px 64px;
+        }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
-        .hero { text-align: center; margin-bottom: 5rem; animation: fadeUp 1s ease-out; }
-        .badge { display: inline-block; padding: 0.5rem 1.2rem; background: rgba(79, 172, 254, 0.1); border: 1px solid rgba(79, 172, 254, 0.2); color: #4facfe; border-radius: 50px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 1.5rem; }
-        h1 { font-size: 3.5rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 1rem; background: var(--text-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        h1 span { background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 
+        /* 히어로 */
+        .hero { text-align: center; margin-bottom: 4rem; animation: fadeUp 1s ease-out; }
+        .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 0.45rem 1.1rem;
+            background: rgba(2,132,199,0.08);
+            border: 1px solid rgba(2,132,199,0.2);
+            color: #0284c7;
+            border-radius: 50px; font-size: 0.78rem; font-weight: 600;
+            letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1.5rem;
+        }
+        .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #0284c7; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(1.5)} }
+
+        h1 { font-size: 3.6rem; font-weight: 900; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1rem; color: #0f172a; }
+        h1 span { background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.7; }
+
+        /* 글래스 패널 */
         .glass-panel {
-            background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 20px; padding: 2.5rem; margin-bottom: 2rem; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1); backdrop-filter: blur(16px); transform: translateY(20px); animation: fadeUp 0.8s forwards;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 24px; padding: 2.5rem; margin-bottom: 2rem;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.8) inset, 0 20px 40px -12px rgba(14,165,233,0.12), 0 8px 16px -4px rgba(0,0,0,0.06);
+            transform: translateY(20px); animation: fadeUp 0.8s forwards;
         }
 
-        h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.8rem; }
-        h2::before { content: ''; display: block; width: 4px; height: 1.2em; background: var(--accent-gradient); border-radius: 4px; }
+        h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.8rem; color: #0f172a; }
+        h2::before { content: ''; display: block; width: 3px; height: 1.2em; background: var(--accent-gradient); border-radius: 4px; }
 
-        .table-responsive { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--panel-border); }
-        table { width: 100%; min-width: 800px; border-collapse: collapse; text-align: center; background: rgba(255, 255, 255, 0.5); }
-        th, td { padding: 1.2rem; border-bottom: 1px solid var(--panel-border); font-size: 0.95rem; }
-        th { background: rgba(0,0,0,0.04); font-weight: 600; color: #334155; }
-        
+        /* 테이블 */
+        .table-responsive { width: 100%; overflow-x: auto; border-radius: 14px; border: 1px solid var(--panel-border); }
+        table { width: 100%; min-width: 800px; border-collapse: collapse; text-align: center; background: rgba(255,255,255,0.5); }
+        th, td { padding: 1.1rem; border-bottom: 1px solid rgba(148,163,184,0.15); font-size: 0.9rem; }
+        th { background: rgba(248,250,252,0.8); font-weight: 600; color: #334155; font-size: 0.82rem; letter-spacing: 0.03em; }
+        tr:hover td { background: rgba(14,165,233,0.03); }
+
+        /* 업로드 버튼 */
+        #analyze-btn {
+            background: var(--accent-gradient) !important; border: none !important;
+            box-shadow: 0 4px 14px rgba(2,132,199,0.35) !important; transition: var(--transition) !important;
+        }
+        #analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(2,132,199,0.45) !important; }
+
+        /* 규정 링크 카드 */
+        .regulations-link-card { transition: var(--transition); }
+        .regulations-link-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(2,132,199,0.15) !important; }
+
+        /* 캘린더 */
+        .fc-event { border: none !important; box-shadow: 0 2px 6px rgba(0,0,0,0.12); cursor: pointer; }
+        .fc-header-toolbar h2 { font-size: 1.1rem !important; font-weight: 700 !important; }
+        .fc-day-today { background: rgba(2,132,199,0.06) !important; }
+
         @media (max-width: 768px) {
-            .container { padding: 2rem 0.5rem; }
+            .container { padding: 2rem 0.75rem; }
             h1 { font-size: 2.2rem; }
-            .glass-panel { padding: 1rem; }
+            .glass-panel { padding: 1.2rem; }
             th, td { padding: 0.8rem 0.5rem; font-size: 0.8rem; }
         }
-
         .scroll-hint { display: none; text-align: right; font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.5rem; }
         @media (max-width: 768px) { .scroll-hint { display: block; } }
-
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-        /* Calendar Custom */
-        .fc-event { border: none !important; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; }
-        .fc-header-toolbar h2 { font-size: 1.2rem !important; font-weight: 700 !important; }
     </style>
 </head>
 
@@ -82,6 +124,7 @@
     <div class="bg-shapes">
         <div class="shape shape-1"></div>
         <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
     </div>
 
     <div class="container">
@@ -111,50 +154,50 @@
 
                     <!-- KPI 카드 4개 -->
                     <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:1.5rem;">
-                        <div id="kpi-flights" style="background:rgba(255,255,255,0.7); border:1px solid var(--panel-border); border-radius:14px; padding:1rem 1.2rem;">
-                            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">✈️ 이번달 비행편수</div>
-                            <div id="kpi-flights-val" style="font-size:1.6rem; font-weight:700; color:#0f172a;">—</div>
-                            <div id="kpi-flights-sub" style="font-size:0.72rem; color:#94a3b8; margin-top:2px;"></div>
+                        <div id="kpi-flights" style="background:rgba(255,255,255,0.8); border:1px solid rgba(148,163,184,0.2); border-radius:16px; padding:1rem 1.2rem; backdrop-filter:blur(12px); box-shadow:0 4px 12px rgba(14,165,233,0.08);">
+                            <div style="font-size:0.72rem; color:#64748b; margin-bottom:6px; letter-spacing:0.04em;">✈️ 이번달 비행편수</div>
+                            <div id="kpi-flights-val" style="font-size:1.7rem; font-weight:700; color:#0f172a;">—</div>
+                            <div id="kpi-flights-sub" style="font-size:0.7rem; color:#94a3b8; margin-top:3px;"></div>
                         </div>
-                        <div id="kpi-7d" style="background:rgba(255,255,255,0.7); border:1px solid var(--panel-border); border-radius:14px; padding:1rem 1.2rem;">
-                            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">⏱️ 7일 누적 비행시간</div>
-                            <div id="kpi-7d-val" style="font-size:1.6rem; font-weight:700; color:#0f172a;">—</div>
-                            <div style="height:5px; border-radius:3px; background:#e2e8f0; margin-top:8px; overflow:hidden;">
-                                <div id="kpi-7d-bar" style="height:100%; border-radius:3px; background:#0284c7; width:0%; transition:width .6s;"></div>
+                        <div id="kpi-7d" style="background:rgba(255,255,255,0.8); border:1px solid rgba(148,163,184,0.2); border-radius:16px; padding:1rem 1.2rem; backdrop-filter:blur(12px); box-shadow:0 4px 12px rgba(14,165,233,0.08);">
+                            <div style="font-size:0.72rem; color:#64748b; margin-bottom:6px; letter-spacing:0.04em;">⏱️ 7일 누적 비행시간</div>
+                            <div id="kpi-7d-val" style="font-size:1.7rem; font-weight:700; color:#0f172a;">—</div>
+                            <div style="height:4px; border-radius:2px; background:#e2e8f0; margin-top:10px; overflow:hidden;">
+                                <div id="kpi-7d-bar" style="height:100%; border-radius:2px; background:linear-gradient(90deg,#0284c7,#0ea5e9); width:0%; transition:width .8s cubic-bezier(.4,0,.2,1);"></div>
                             </div>
-                            <div id="kpi-7d-sub" style="font-size:0.72rem; color:#94a3b8; margin-top:3px;"></div>
+                            <div id="kpi-7d-sub" style="font-size:0.7rem; color:#94a3b8; margin-top:4px;"></div>
                         </div>
-                        <div id="kpi-28d" style="background:rgba(255,255,255,0.7); border:1px solid var(--panel-border); border-radius:14px; padding:1rem 1.2rem;">
-                            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">📅 28일 누적 비행시간</div>
-                            <div id="kpi-28d-val" style="font-size:1.6rem; font-weight:700; color:#0f172a;">—</div>
-                            <div style="height:5px; border-radius:3px; background:#e2e8f0; margin-top:8px; overflow:hidden;">
-                                <div id="kpi-28d-bar" style="height:100%; border-radius:3px; background:#0284c7; width:0%; transition:width .6s;"></div>
+                        <div id="kpi-28d" style="background:rgba(255,255,255,0.8); border:1px solid rgba(148,163,184,0.2); border-radius:16px; padding:1rem 1.2rem; backdrop-filter:blur(12px); box-shadow:0 4px 12px rgba(14,165,233,0.08);">
+                            <div style="font-size:0.72rem; color:#64748b; margin-bottom:6px; letter-spacing:0.04em;">📅 28일 누적 비행시간</div>
+                            <div id="kpi-28d-val" style="font-size:1.7rem; font-weight:700; color:#0f172a;">—</div>
+                            <div style="height:4px; border-radius:2px; background:#e2e8f0; margin-top:10px; overflow:hidden;">
+                                <div id="kpi-28d-bar" style="height:100%; border-radius:2px; background:linear-gradient(90deg,#0284c7,#0ea5e9); width:0%; transition:width .8s cubic-bezier(.4,0,.2,1);"></div>
                             </div>
-                            <div id="kpi-28d-sub" style="font-size:0.72rem; color:#94a3b8; margin-top:3px;"></div>
+                            <div id="kpi-28d-sub" style="font-size:0.7rem; color:#94a3b8; margin-top:4px;"></div>
                         </div>
-                        <div id="kpi-warn" style="background:rgba(255,255,255,0.7); border:1px solid var(--panel-border); border-radius:14px; padding:1rem 1.2rem;">
-                            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">🔔 경고 / 위반</div>
-                            <div id="kpi-warn-val" style="font-size:1.6rem; font-weight:700; color:#0f172a;">—</div>
-                            <div id="kpi-warn-sub" style="font-size:0.72rem; color:#94a3b8; margin-top:2px;"></div>
+                        <div id="kpi-warn" style="background:rgba(255,255,255,0.8); border:1px solid rgba(148,163,184,0.2); border-radius:16px; padding:1rem 1.2rem; backdrop-filter:blur(12px); box-shadow:0 4px 12px rgba(14,165,233,0.08);">
+                            <div style="font-size:0.72rem; color:#64748b; margin-bottom:6px; letter-spacing:0.04em;">🔔 경고 / 위반</div>
+                            <div id="kpi-warn-val" style="font-size:1.7rem; font-weight:700; color:#0f172a;">—</div>
+                            <div id="kpi-warn-sub" style="font-size:0.7rem; color:#94a3b8; margin-top:3px;"></div>
                         </div>
                     </div>
 
                     <!-- 차트 2개 나란히 -->
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-                        <div style="background:rgba(255,255,255,0.7); border:1px solid var(--panel-border); border-radius:14px; padding:1.2rem;">
-                            <div style="font-size:0.8rem; font-weight:600; color:#475569; margin-bottom:0.75rem;">7일 누적 비행시간 추이</div>
-                            <div style="display:flex; gap:14px; font-size:0.72rem; color:#64748b; margin-bottom:8px; flex-wrap:wrap;">
-                                <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0284c7;margin-right:3px;vertical-align:middle;"></span>7일 누적</span>
-                                <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#ef4444;opacity:.7;margin-right:3px;vertical-align:middle;"></span>한도 40h</span>
+                        <div style="background:rgba(255,255,255,0.7); border:1px solid rgba(148,163,184,0.2); border-radius:16px; padding:1.2rem; backdrop-filter:blur(12px);">
+                            <div style="font-size:0.78rem; font-weight:600; color:#475569; margin-bottom:0.75rem; letter-spacing:0.03em;">7일 누적 비행시간 추이</div>
+                            <div style="display:flex; gap:14px; font-size:0.7rem; color:#64748b; margin-bottom:8px; flex-wrap:wrap;">
+                                <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0284c7;margin-right:4px;vertical-align:middle;"></span>7일 누적</span>
+                                <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#ef4444;opacity:.7;margin-right:4px;vertical-align:middle;"></span>한도 60h</span>
                             </div>
                             <div style="position:relative; height:200px;"><canvas id="trend-chart"></canvas></div>
                         </div>
-                        <div style="background:rgba(255,255,255,0.7); border:1px solid var(--panel-border); border-radius:14px; padding:1.2rem;">
-                            <div style="font-size:0.8rem; font-weight:600; color:#475569; margin-bottom:0.75rem;">편별 FDP 현황</div>
-                            <div style="display:flex; gap:14px; font-size:0.72rem; color:#64748b; margin-bottom:8px; flex-wrap:wrap;">
-                                <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0284c7;margin-right:3px;vertical-align:middle;"></span>정상</span>
-                                <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;margin-right:3px;vertical-align:middle;"></span>경고</span>
-                                <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#ef4444;margin-right:3px;vertical-align:middle;"></span>위반</span>
+                        <div style="background:rgba(255,255,255,0.7); border:1px solid rgba(148,163,184,0.2); border-radius:16px; padding:1.2rem; backdrop-filter:blur(12px);">
+                            <div style="font-size:0.78rem; font-weight:600; color:#475569; margin-bottom:0.75rem; letter-spacing:0.03em;">편별 FDP 현황</div>
+                            <div style="display:flex; gap:14px; font-size:0.7rem; color:#64748b; margin-bottom:8px; flex-wrap:wrap;">
+                                <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#0284c7;margin-right:4px;vertical-align:middle;"></span>정상</span>
+                                <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;margin-right:4px;vertical-align:middle;"></span>경고</span>
+                                <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#ef4444;margin-right:4px;vertical-align:middle;"></span>위반</span>
                             </div>
                             <div style="position:relative; height:200px;"><canvas id="fdp-chart"></canvas></div>
                         </div>
@@ -302,8 +345,8 @@
             document.getElementById('kpi-28d-bar').style.background = pct28 >= 90 ? '#ef4444' : pct28 >= 75 ? '#f59e0b' : '#0284c7';
             document.getElementById('kpi-28d-sub').textContent = `한도 100:00 대비 ${pct28.toFixed(1)}%`;
             const kpi28el = document.getElementById('kpi-28d');
-            if (pct28 >= 90) { kpi28el.style.borderColor = '#fca5a5'; kpi28el.style.background = 'rgba(254,226,226,0.5)'; }
-            else if (pct28 >= 75) { kpi28el.style.borderColor = '#fcd34d'; kpi28el.style.background = 'rgba(254,243,199,0.5)'; }
+            if (pct28 >= 90) { kpi28el.style.borderColor = '#fca5a5'; kpi28el.style.background = 'rgba(254,226,226,0.6)'; }
+            else if (pct28 >= 75) { kpi28el.style.borderColor = '#fcd34d'; kpi28el.style.background = 'rgba(254,243,199,0.6)'; }
 
             // KPI 4: 경고/위반
             let totalWarn = 0;
@@ -319,7 +362,7 @@
                 warnEl.style.color = totalWarn >= 3 ? '#dc2626' : '#d97706';
                 warnSub.textContent = '경고 포함 누적';
                 kpiWarn.style.borderColor = '#fca5a5';
-                kpiWarn.style.background = 'rgba(254,226,226,0.5)';
+                kpiWarn.style.background = 'rgba(254,226,226,0.6)';
             }
 
             // 차트 1: 7일 누적 추이
